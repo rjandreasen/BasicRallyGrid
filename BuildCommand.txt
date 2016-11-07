@@ -1,3 +1,0 @@
-c:\>rally-app-builder build
-
-from inside the project folder

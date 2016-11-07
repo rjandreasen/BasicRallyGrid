@@ -12,7 +12,7 @@
     componentCls: 'app',
     launch: function () {
         //Write app code here
-        console.log('My first App - v1.25');
+        console.log('My first App - v1.31');
         this.pulldownContainer = Ext.create('Ext.container.Container', {
             layout: {
                 type: 'hbox',
@@ -24,18 +24,37 @@
         this._loadIterations();
     },
 
+    // AND together the two filters and return them
+    _getFilters: function(iterationValue, priorityValue) {
+
+        var iterFilter = Ext.create('Rally.data.wsapi.Filter', {
+            property: 'Iteration',
+            operator: '=',
+            value: iterationValue
+        });
+
+        var priorityFilter = Ext.create('Rally.data.wsapi.Filter', {
+            property: 'Priority',
+            operator: '=',
+            value: priorityValue
+        });
+
+        return iterFilter.and(priorityFilter);
+    },
+
+    // Event handlers
+    _onIterationReady: function(combobox, eOpts){
+        this._loadPriorities();
+    },
+
     // Load a combo box with all iterations
     _loadIterations: function () {
         this.iterComboBox = Ext.create('Rally.ui.combobox.IterationComboBox',{
             fieldLabel: 'Iteration',
             labelAlign: 'right',
             listeners:{
-                ready: function(combobox){
-                    this._loadPriorities();
-                },
-                select: function(combobox, records) {
-                    this._loadData();
-                },
+                ready: this._onIterationReady,
+                select: this._loadData,
                 scope: this
             }
         });
@@ -50,12 +69,8 @@
             fieldLabel: 'Priority',
             labelAlign: 'right',
             listeners:{
-                ready: function(combobox){
-                    this._loadData();
-                },
-                select: function(combobox, records) {
-                    this._loadData();
-                },
+                ready: this._loadData,
+                select: this._loadData,
                 scope: this
             }
         });
@@ -68,31 +83,19 @@
     _loadData: function () {
         var selectIterRef = this.iterComboBox.getRecord().get('_ref');
         var selectPriorityValue = this.priorityComboBox.getRecord().get('value');
-
-        var myFilters = [
-            {
-                property: 'Iteration',
-                operator: '=',
-                value: selectIterRef
-            },
-            {
-                property: 'Priority',
-                operator: '=',
-                value: selectPriorityValue
-            }
-        ];
+        var comboFilter = this._getFilters(selectIterRef,selectPriorityValue);
 
         // If store exists, load new data
         if(this.defectStore) {
             // Update filters and reload data
-            this.defectStore.setFilter(myFilters);
+            this.defectStore.setFilter(comboFilter);
             this.defectStore.load();
         } else {
             // Create store
             this.defectStore = Ext.create('Rally.data.wsapi.Store', {
                 model: 'Defect',
                 autoLoad: true,
-                filters: myFilters,
+                filters: comboFilter,
                 listeners: {
                     load: function (store, data, success) {
                         if(!this.myGrid) {

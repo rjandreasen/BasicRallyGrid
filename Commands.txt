@@ -1,0 +1,15 @@
+------------------------------------------------------
+BUILDING THE APP
+------------------------------------------------------
+c:\Users\ra789213\BasicRallyGrid>rally-app-builder build
+
+
+
+------------------------------------------------------
+CHECKING INTO GIT
+------------------------------------------------------
+c:\Users\ra789213\BasicRallyGrid>git add .
+c:\Users\ra789213\BasicRallyGrid>git commit -m "comment about the change"
+c:\Users\ra789213\BasicRallyGrid>git push
+
+* the proxy server will block the last command
